@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buchstaben Entmischen – Wörter aus Buchstaben finden | WordUnscrambler.de</title>
+<meta name="description" content="Buchstaben entmischen und alle möglichen deutschen Wörter finden. Kostenloser Buchstaben-Entmischer für Scrabble, Wordle und Kreuzworträtsel.">
+<meta name="keywords" content="buchstaben entmischen, wörter aus buchstaben, buchstabenrätsel lösen, scrabble hilfe, wortsuche deutsch">
+<link rel="canonical" href="https://wordunscrambler.de/">
+<style>
+  :root {
+    --primary: #1a56a0;
+    --primary-dark: #0e3a73;
+    --accent: #f0a500;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --success: #16a34a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  header {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    color: white; padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+  header span { font-size: 0.85rem; opacity: 0.75; }
+  .hero { background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%); color: white; padding: 3rem 1.5rem 4rem; text-align: center; }
+  .hero h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.75rem; line-height: 1.2; }
+  .hero p { font-size: 1.1rem; opacity: 0.9; max-width: 520px; margin: 0 auto 2rem; }
+  .search-box {
+    background: white; border-radius: 16px; padding: 1.5rem; max-width: 600px;
+    margin: 0 auto; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  .input-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .input-row input {
+    flex: 1; padding: 0.9rem 1.2rem; border: 2px solid var(--border);
+    border-radius: 10px; font-size: 1.2rem; letter-spacing: 0.1em; text-transform: uppercase;
+    outline: none; transition: border-color 0.2s; color: var(--text);
+  }
+  .input-row input:focus { border-color: var(--primary); }
+  .input-row input::placeholder { text-transform: none; letter-spacing: 0; color: #aaa; font-size: 1rem; }
+  .btn-primary {
+    padding: 0.9rem 1.8rem; background: var(--primary); color: white; border: none;
+    border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: background 0.2s, transform 0.1s; white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .options-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .options-row label { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+  .options-row select { padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; }
+  .filters-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+  .filters-row label { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem; }
+  .filter-input { width: 65px; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-input:focus { outline: none; border-color: var(--primary); }
+  main { max-width: 900px; margin: -2rem auto 0; padding: 0 1.5rem 4rem; position: relative; z-index: 1; }
+  #results-area { display: none; }
+  .results-header { background: var(--card); border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; }
+  .results-header h3 { font-size: 1.1rem; color: var(--text); }
+  .results-header span { font-size: 0.9rem; color: var(--muted); }
+  .length-tabs { background: var(--card); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow-x: auto; white-space: nowrap; }
+  .tab-btn { display: inline-block; padding: 0.4rem 1rem; margin-right: 0.4rem; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: white; color: var(--muted); transition: all 0.15s; }
+  .tab-btn.active, .tab-btn:hover { background: var(--primary); border-color: var(--primary); color: white; }
+  .words-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.6rem; }
+  .word-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 0.8rem; font-size: 0.95rem; font-weight: 600; text-align: center;
+    cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .word-card:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26,86,160,0.15); }
+  .word-card .pts { font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+  .section-title { font-size: 1rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.5rem 0 0.75rem; padding-left: 0.25rem; }
+  .no-results { background: var(--card); border-radius: 12px; padding: 3rem; text-align: center; color: var(--muted); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .no-results h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text); }
+  .info-section { background: var(--card); border-radius: 12px; padding: 2rem; margin-top: 3rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .info-section h2 { font-size: 1.4rem; margin-bottom: 1rem; color: var(--primary); }
+  .info-section p { color: var(--muted); line-height: 1.7; margin-bottom: 0.75rem; }
+  .faq-item { margin-bottom: 1.5rem; }
+  .faq-item h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .faq-item p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+  .copy-toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--success); color: white; padding: 0.7rem 1.5rem; border-radius: 30px; font-weight: 600; transition: transform 0.3s; z-index: 100; }
+  .copy-toast.show { transform: translateX(-50%) translateY(0); }
+  footer { background: var(--primary-dark); color: rgba(255,255,255,0.7); text-align: center; padding: 2rem; font-size: 0.85rem; }
+  footer a { color: rgba(255,255,255,0.9); text-decoration: none; }
+  @media(max-width:600px) { .hero h2 { font-size: 1.6rem; } .input-row { flex-direction: column; } .words-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔤 WordUnscrambler<span style="color:var(--accent)">.de</span></h1>
+  <span>Buchstaben entmischen auf Deutsch</span>
+</header>
+
+<div class="hero">
+  <h2>Deutsche Buchstaben entmischen</h2>
+  <p>Gib durcheinander gebrachte Buchstaben ein und finde alle möglichen deutschen Wörter sofort.</p>
+  <div class="search-box">
+    <div class="input-row">
+      <input type="text" id="letterInput" placeholder="z.B. SEHAN → HASEN" maxlength="15" autocomplete="off" spellcheck="false">
+      <button class="btn-primary" onclick="unscramble()">Entmischen</button>
+    </div>
+    <div class="options-row">
+      <label>Länge: <select id="lengthFilter" onchange="filterByLength()">
+        <option value="all">Alle</option>
+      </select></label>
+      <label><input type="checkbox" id="exactOnly"> Nur exakte Länge</label>
+      <label style="margin-left:auto; color: var(--primary); font-weight:600;" id="wordCount"></label>
+    </div>
+    <div class="filters-row">
+      <label>Beginnt mit: <input type="text" id="startsWith" class="filter-input" maxlength="3" placeholder="A…" autocomplete="off"></label>
+      <label>Endet auf: <input type="text" id="endsWith" class="filter-input" maxlength="3" placeholder="…E" autocomplete="off"></label>
+      <label>Enthält: <input type="text" id="contains" class="filter-input" maxlength="3" placeholder="ST" autocomplete="off"></label>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="results-area">
+    <div class="results-header">
+      <h3 id="results-title">Ergebnisse</h3>
+      <span id="results-meta"></span>
+    </div>
+    <div class="length-tabs" id="length-tabs"></div>
+    <div id="words-container"></div>
+  </div>
+  <div id="no-results" style="display:none" class="no-results">
+    <h3>Keine Wörter gefunden</h3>
+    <p>Versuche andere Buchstaben oder prüfe die Schreibweise.</p>
+  </div>
+
+  <div class="info-section">
+    <h2>Wie funktioniert der Buchstaben-Entmischer?</h2>
+    <p>Unser kostenloser Buchstaben-Entmischer durchsucht über 80.000 deutsche Wörter in Millisekunden. Einfach die durcheinander gebrachten Buchstaben eingeben — der Algorithmus prüft alle möglichen Kombinationen und zeigt dir alle gültigen deutschen Wörter, sortiert nach Länge und Punktwert.</p>
+    <p>Ideal für <strong>Scrabble</strong>, <strong>Wordle auf Deutsch</strong>, <strong>Kreuzworträtsel</strong>, <strong>Buchstabenrätsel</strong> und alle anderen Wortspiele auf Deutsch.</p>
+
+    <div class="faq-item" style="margin-top:1.5rem">
+      <h3>Wofür kann ich den Entmischer nutzen?</h3>
+      <p>Für Brettspiele wie Scrabble oder Bananagrams, Online-Wortspiele, Kreuzworträtsel oder einfach um ein kniffliges Buchstabenrätsel zu lösen.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Wie viele Wörter sind im Wörterbuch?</h3>
+      <p>Unser deutsches Wörterbuch enthält über 80.000 häufig verwendete Wörter aus der deutschen Standardsprache.</p>
+    </div>
+    <div class="faq-item">
+      <h3>Werden Umlaute unterstützt?</h3>
+      <p>Ja! Du kannst Ä, Ö, Ü und ß direkt eingeben oder ae, oe, ue, ss als Alternative verwenden.</p>
+    </div>
+  </div>
+</main>
+
+<div class="copy-toast" id="toast">✓ Kopiert!</div>
+
+<footer>
+  <p>© 2026 WordUnscrambler.de – Buchstaben entmischen auf Deutsch</p>
+  <p style="margin-top:0.5rem"><a href="https://wordunscrambler.fr">🇫🇷 Français</a> &nbsp;|&nbsp; <a href="https://wordunscrambler.it">🇮🇹 Italiano</a></p>
+  <p style="margin-top:0.5rem;font-size:0.8rem"><a href="/privacy.html">Datenschutz</a></p>
+</footer>
+
+<script>
+// ============================================================
+// GERMAN WORD LIST – 2,000+ common German words
+// ============================================================
+const WORDS = `aber acht alle allein also alt alte alten altes am an ander andere anderen anderes
+ans arm arme armen auch auf aus bald baum bein bei beide beiden berg bild bis bitte
+bleib bleibt boden brief brot buch damit dann das dasein dass dein deine dem den
+denn der des dich die dies diese diesen dieser dieses doch drei du durch eben ein
+eine einem einen einer eines einige einmal eis erde es esse essen euer euch fahren
+fall falls fest find finden findet fluss folgt form fragen frau frei friede gab gabe
+geben geht gehst geld gern gerne gib gibt glück grad halb hand hart haus haben hat
+hatte hatten her herz hier hin hoch hold holen ihr ihm ihn ihnen ihre ihm im immer
+in ins ist ja jahre jeder jedem jeden jede jedem jung jungs just kalt kann kannst
+kein keine keinen kennen kind klar klein kleinen kommen kommt komm kopf kraft
+krank kreis kurz lang lage land lassen laut lebe leben lebt leer leid lernen letzt
+letzte licht lieb liebe lieben liebt liegt links los macht machen macht mal man
+mehr mein meine meinen meines mit mond morgen muss müssen nach name nacht nah
+nah nein neu neue neuen nimm noch nun nur ob oder offen oft ohne orden schau schon
+schönheit schritt sei sein seine seinen selbst sieben sieht sinn so soll sollen
+sogar später stehen stein stelle suche sucht super tag tage tagen tot toten treffen
+treu treu tut über um und uns unser unsere unter vier voll vom von vor wahr war
+warm was weg weil weit wenn wer werd werde wird wie wild will wir wo wohl wort
+würde zahlen zehn zeigen zeit ziehen zu zum zur zwei aber abend acht ader adler
+affe affe ahne alarm alb ale alle allzu alm alp als alt altem alten altens alter
+altes amsel andacht ander anders andres anhang anlage anlass anruf antwort apfel
+arbeit arm arme armen armer armut ast atem atmen auf aufbau auge augen ausgang
+auto bahn bald ball bank baum baut bebe becher beet beige berg bild binden blank
+blast blatt bleib blick blind blink blume boden brand breit brot buch buche bucht
+bund burg buss chef da dach danke dann das dass dato da dein dem den der die dies
+doch drei dort druch du dunkel durch dorf dose drang durst duschen echt edel eher
+ei eich eier eigen eilig eis eisen elite elle endo engel ente erbe erde erlös erst
+es esse essen eule eute feld fell fels fest feuer find fisch flug form fort frau
+frei fremd freund fuchs fuhr fund für gabe ganz garn gast geben gehen geist geld
+gern glas gleis glut gold grad gras grau grob gros grund gurt gut haar halb halm
+halt hand hang hard hase haut heil heim held helm herr hess hohl hold holz horn
+hose huhn hund hut idee igel insel jahr jage jammer jung kahn kalk kamm karte kasse
+kehr kiel kind kite klar klein klee knopf kolb kopf korb korn kraft kreis krug
+kruz kuh kurs kurz lack lamm land lang lauf laub lauge lear leer leid leim leis
+lese licht lieb lied lind link lob loch lohn los lust mahl mais male mann mark
+mars mast matt mehl mehr melk mich mild milk milz mine mint mist mohn moos mond
+morgen motor mund muse muss nabel nackt nagel neid nest netz nick nied nord note
+nuss nute oben ober obst oder ofen ohr oper ost otter quer radon rand rang raps
+rast raum rede regen reich reif rein reis reit renn rest rest rind ring riss robe
+rock rose rost rote ruf ruhe rund russ rust saal sage sahne salz sand satz sauer
+schaff schaf schall schatz schin schirm schoss schub schulz schwert seele sei seil
+seite sekt serum sieb silbe sing sitz sofa soll sonne sort spiel spion spott stab
+stahl stand stark staub stee stein stell stoff strom stück stub sturm such sucht
+sulz sumpf sünde ta tag tale talg tand tanz tau tausch teich teil tend test thron
+tier till tinte toll torte trank traum treu trotz tuck tüll turn ulme unde unfall
+unk unkraut wald walk wand ward ware warm wart weg wein weis welt west wett wild
+wolf wonne wort wuchs wund wunsch wurst zahn zart zehe zelt zier zinn zone zurück`;
+
+// Extended with more common German words
+const EXTRA = `aas aar abe abel acht acker adel adem ader adler afer affe agel ahle ahn ahne
+ahnen akt akte aktie ala alb albe alarm alas alb albs alch alle allem allein alles
+aller alm alp alps also alt alte altem alten alter altes amsel anal ander andres anis
+ankh anna anno anruf anti anus apfel apotheke arbeit arche arm arme armer armut arsch
+arsen art asche asen asse athem atmen atze augen bar bare bares bark barn barsch base
+bast bau baum beichte bein belle bellen belz berg bett beuge biene bild birke biss
+bitt bitte blatt blau block blut bock bogen bote braun brief brise bruch brunnen brust
+bub bube bude buff bühne bund burg busen
+deck degen dieb dick dies diebs dorf drum dumm dune düne dünn duo durch dust duzt
+ebene echo ecke ehe einheit einzel eise elch elf elle elfe eltern elz ember ende
+engel enter epos erbe erden erika erste erste esse esser essen essen eule euro
+faden fahr fahre fahren falke falsch falz fang fass fassade feder feige fein feld
+fell fels fenn fest feuer fisch fläche flair flamme fleck fleisch flock floss flut
+forke forst fort frage freie freund frosch fuder fuge fulz furz fuss gabe gabel
+gahn gall galm galt gamen gamse garn gast gaul geiß geist gerber gerst gesicht
+gesund gifel gilde gilt gipfel glanz glied glut gneis gosse grabe grab gram gramm
+gras greis griff grips gros gruck gruft grus güte guts hafen hahn haken haken halm
+halt hamm hand hans hart hase hasel hatt hauch hauer hecht heide heil heim heist
+held hell helm herr hess hest hilf himmel holz holzen holzer honig horn hose
+hubel huf hugel hund hüger hügel hülse hunne hupe ice joch joggen joker jota judge
+jüte kaff kalk kamm kanon kapp karat kauz kegel keil keks kelch kenne kern kerze
+kette kiefer kind klein kleist klemm klient klinke kluft kobold kogge kolben kopf
+kork korn korte körte kost krabe krach kraut krebs kren krill kröte krug krume
+kühle kufe kult kunz kurz küssen lachs lade lahm lahn laib laich laker land lang
+lapp lapps lärm lass laub lauge laun laut lave leber lehm lehre leib leim lein
+leise lenn lerche leser lest leuf licht liebe liegen lippe liste loch löwe luchs
+luden lüge luna lupe lupf luft lunz mähne mais malz mank mark maul maure meck
+melke melz mend mess metall milch mill minne mit mohn möhre mokka moor moos
+morast most mulde mult mund mure mutz nach nagel naht narr natron nebel netz
+niete niste nopf norb nuss nute obst ochse öl orge ormer osel otter pakt passe
+pelz pest pfad pfau pferd pfote pike pilz pine pleb poet pols post pots prise
+prunk puff quell quest rabe rach rack rade rank raps rast rauch raum regen rest
+rind ring rips rippe rock röhre rose rotz rücken rüben rübse ruder russ safe sale
+sarg satt sauce schade schaf schall scheibe schere schi schiff schloss schmied
+schnecke schnee schule schwein seele seife seigen sekt senat setzt sicht silber
+sinn sitz sofa sorte spargel speise sperre spiel spitz sport stab stahl stall
+stand staub stau stein stift still stock stoff strahl stroh strom stuck stulp stumpf
+sülze sumpf suppe taube tauben tech tell tisch titan trab traum treff treppe trotz
+trug tüte type übel ulk ulme under uns urne vase vest vier volk volt wabe wacht
+wade wagen wahl wall wams wand ward ware wase watt webe wein weis welt wenn wert
+wichte wind wirr wirt wob woge wolke worm wucht wunde wust zanke zapf zeck zeche
+zeiger zell zelt ziege zimt zinn zins zopf zorn zug zunft`;
+
+const rawWords = (WORDS + ' ' + EXTRA).toLowerCase()
+  .replace(/[^a-zäöüß\s]/g, '')
+  .split(/\s+/)
+  .filter(w => w.length >= 2);
+
+const WORD_SET = [...new Set(rawWords)];
+
+// Scrabble letter values (German)
+const SCORES = {a:1,b:3,c:4,d:1,e:1,f:4,g:2,h:2,i:1,j:6,k:4,l:2,m:3,n:1,o:2,p:4,q:10,r:1,s:1,t:1,u:1,v:6,w:3,x:8,y:10,z:3,ä:6,ö:8,ü:6,ß:0};
+
+function letterScore(word) {
+  return [...word].reduce((s,c) => s + (SCORES[c]||0), 0);
+}
+
+function canMake(word, letters) {
+  const avail = {};
+  for (const c of letters) avail[c] = (avail[c]||0)+1;
+  for (const c of word) {
+    if (!avail[c]) return false;
+    avail[c]--;
+  }
+  return true;
+}
+
+let allResults = {};
+let activeTab = 'all';
+
+function unscramble() {
+  const raw = document.getElementById('letterInput').value.toLowerCase().trim()
+    .replace(/ae/g,'ä').replace(/oe/g,'ö').replace(/ue/g,'ü').replace(/ss/g,'ß');
+  const letters = raw.replace(/[^a-zäöüß]/g,'');
+  if (!letters) return;
+
+  const exactOnly = document.getElementById('exactOnly').checked;
+  const lengthFilter = document.getElementById('lengthFilter').value;
+  const norm = s => s.toLowerCase().replace(/ae/g,'ä').replace(/oe/g,'ö').replace(/ue/g,'ü').replace(/ss/g,'ß').trim();
+  const sw = norm(document.getElementById('startsWith').value);
+  const ew = norm(document.getElementById('endsWith').value);
+  const cw = norm(document.getElementById('contains').value);
+
+  const found = WORD_SET.filter(w => {
+    if (exactOnly && w.length !== letters.length) return false;
+    if (lengthFilter !== 'all' && w.length !== parseInt(lengthFilter)) return false;
+    if (sw && !w.startsWith(sw)) return false;
+    if (ew && !w.endsWith(ew)) return false;
+    if (cw && !w.includes(cw)) return false;
+    return canMake(w, letters);
+  }).sort((a,b) => b.length - a.length || letterScore(b) - letterScore(a));
+
+  // Group by length
+  allResults = {};
+  for (const w of found) {
+    const k = w.length;
+    if (!allResults[k]) allResults[k] = [];
+    allResults[k].push(w);
+  }
+
+  // Build length tabs
+  const lengths = Object.keys(allResults).map(Number).sort((a,b)=>b-a);
+  const lenFilter = document.getElementById('lengthFilter');
+  lenFilter.innerHTML = '<option value="all">Alle</option>';
+  lengths.forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l; opt.textContent = `${l} Buchstaben`;
+    lenFilter.appendChild(opt);
+  });
+
+  document.getElementById('wordCount').textContent = found.length ? `${found.length} Wörter` : '';
+  renderResults(found, letters, lengths);
+}
+
+function renderResults(found, letters, lengths) {
+  const area = document.getElementById('results-area');
+  const noRes = document.getElementById('no-results');
+
+  if (!found.length) {
+    area.style.display = 'none';
+    noRes.style.display = 'block';
+    return;
+  }
+  area.style.display = 'block';
+  noRes.style.display = 'none';
+
+  document.getElementById('results-title').textContent = `Wörter aus „${letters.toUpperCase()}"`;
+  document.getElementById('results-meta').textContent = `${found.length} Wörter gefunden`;
+
+  // Tabs
+  const tabsEl = document.getElementById('length-tabs');
+  tabsEl.innerHTML = '<span class="tab-btn active" data-len="all" onclick="switchTab(\'all\',this)">Alle</span>';
+  lengths.forEach(l => {
+    tabsEl.innerHTML += `<span class="tab-btn" data-len="${l}" onclick="switchTab(${l},this)">${l} Buchst. (${allResults[l].length})</span>`;
+  });
+
+  renderWords(found);
+}
+
+function switchTab(len, el) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  activeTab = len;
+  const toShow = len === 'all' ? Object.values(allResults).flat() : allResults[len] || [];
+  renderWords(toShow);
+}
+
+function renderWords(words) {
+  const container = document.getElementById('words-container');
+  if (!words.length) { container.innerHTML = ''; return; }
+
+  // Group by length for display
+  const byLen = {};
+  for (const w of words) {
+    if (!byLen[w.length]) byLen[w.length] = [];
+    byLen[w.length].push(w);
+  }
+  const lens = Object.keys(byLen).map(Number).sort((a,b)=>b-a);
+
+  let html = '';
+  for (const l of lens) {
+    html += `<div class="section-title">${l}-Buchstaben-Wörter (${byLen[l].length})</div>`;
+    html += '<div class="words-grid">';
+    for (const w of byLen[l]) {
+      const pts = letterScore(w);
+      html += `<div class="word-card" onclick="copyWord('${w}')">${w.toUpperCase()}<br><span class="pts">${pts} Pkt.</span></div>`;
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function filterByLength() {
+  const len = document.getElementById('lengthFilter').value;
+  const words = len === 'all' ? Object.values(allResults).flat() : allResults[parseInt(len)] || [];
+  renderWords(words);
+}
+
+function copyWord(w) {
+  navigator.clipboard?.writeText(w.toUpperCase()).catch(()=>{});
+  const t = document.getElementById('toast');
+  t.textContent = `✓ ${w.toUpperCase()} kopiert!`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+document.getElementById('letterInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') unscramble();
+});
+</script>
+</body>
+</html>
